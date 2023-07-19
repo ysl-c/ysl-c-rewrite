@@ -14,3 +14,5 @@ yslc-test-*
 *.o
 *.obj
 *.lst
+test.asm
+test.com
