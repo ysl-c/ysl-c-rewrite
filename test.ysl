@@ -1,0 +1,10 @@
+func putch ch
+	asm mov ah, 0x0E
+	asm mov al, [__func__putch.__var__ch]
+	asm int 0x10
+end
+
+func main
+	putch 72
+	putch 105
+end

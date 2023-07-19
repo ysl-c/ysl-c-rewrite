@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"yeti0904"
+	],
+	"copyright": "Copyright © 2023, yeti0904",
+	"dependencies": {
+		"yslm": "~>1.1.1"
+	},
+	"description": "The YSL-C compiler",
+	"license": "GPL-3.0-or-later",
+	"name": "yslc"
+}
