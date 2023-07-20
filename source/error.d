@@ -41,6 +41,7 @@ void ErrorExpectedToken(string fname, size_t line) {
 void ErrorUnexpectedToken(string fname, size_t line, TokenType token) {
 	ErrorBegin(fname, line);
 	stderr.writefln("Unexpected token: %s", token);
+	*(cast(ubyte*) null) = 5;
 }
 
 void ErrorUnexpectedKeyword(string fname, size_t line, string keyword) {

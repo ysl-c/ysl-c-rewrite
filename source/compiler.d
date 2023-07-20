@@ -64,10 +64,8 @@ class Compiler {
 		lastFunction = node.name;
 
 		foreach (ref param ; node.parameters) {
-			writeln("hi2");
 			CreateLocal(VariableType.Integer, param);
 		}
-		writeln(locals);
 
 		foreach (ref bodyNode ; node.functionBody) {
 			if (bodyNode.type == NodeType.FunctionDef) {
@@ -92,8 +90,6 @@ class Compiler {
 				}
 				default: assert(0);
 			}
-
-			writeln("hi");
 		}
 
 		output ~= format("label __func_end__%s", node.name);
@@ -152,6 +148,48 @@ class Compiler {
 		output ~= format("asm %s", node.assembly);
 	}
 
+
+	void CompileLocal(LocalDeclarationNode node) {
+		switch (node.declaration.type) {
+			case NodeType.IntVariable: {
+				auto decNode = cast(IntVariableNode) node.declaration;
+				CreateLocal(VariableType.Integer, decNode.name);
+				break;
+			}
+			default: assert(0);
+		}
+	}
+
+	void CompileInt(IntVariableNode node) {
+		CreateGlobal(VariableType.Integer, node.name);
+	}
+
+	void CompileSet(SetNode node) {
+		switch (node.value.type) {
+			case NodeType.Integer: {
+				auto pnode = cast(IntegerNode) node.value;
+				
+				output ~= format(
+					"set %s %d", GetVariable(node.var), pnode.value
+				);
+				break;
+			}
+			case NodeType.String: {
+				assert(0); // TODO
+			}
+			case NodeType.Variable: {
+				auto pnode = cast(VariableNode) node.value;
+
+				output ~= format(
+					"copy %s %s", GetVariable(node.var),
+					GetVariable(pnode.name)
+				);
+				break;
+			}
+			default: assert(0);
+		}
+	}
+
 	void CompileNode(Node node) {
 		switch (node.type) {
 			case NodeType.FunctionDef: {
@@ -166,6 +204,18 @@ class Compiler {
 				CompileAsm(cast(AsmNode) node);
 				break;
 			}
+			case NodeType.LocalDeclaration: {
+				CompileLocal(cast(LocalDeclarationNode) node);
+				break;
+			}
+			case NodeType.IntVariable: {
+				CompileInt(cast(IntVariableNode) node);
+				break;
+			}
+			case NodeType.Set: {
+				CompileSet(cast(SetNode) node);
+				break;
+			}
 			default: assert(0);
 		}
 	}
@@ -173,7 +223,6 @@ class Compiler {
 	void Compile(ProgramNode program) {
 		success  = true;
 		output  ~= "goto __func__main";
-		output  ~= "return";
 	
 		foreach (ref child ; program.children) {
 			CompileNode(child);

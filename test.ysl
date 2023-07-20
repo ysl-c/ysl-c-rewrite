@@ -5,6 +5,7 @@ func putch ch
 end
 
 func main
-	putch 72
-	putch 105
+	local int test
+	set test 65
+	putch test
 end

@@ -3,7 +3,10 @@ module yslc.language;
 const string[] keywords = [
 	"func",
 	"end",
-	"return"
+	"return",
+	"int",
+	"local",
+	"set"
 ];
 
 char Escape(char ch) {

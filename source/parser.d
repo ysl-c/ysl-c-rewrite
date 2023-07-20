@@ -3,6 +3,7 @@ module yslc.parser;
 import std.conv;
 import std.stdio;
 import std.format;
+import core.stdc.stdlib;
 import yslc.error;
 import yslc.lexer;
 
@@ -15,7 +16,10 @@ enum NodeType {
 	String,
 	Variable,
 	Return,
-	Asm
+	Asm,
+	LocalDeclaration,
+	IntVariable,
+	Set
 }
 
 class Node {
@@ -149,6 +153,43 @@ class AsmNode : Node {
 	}
 }
 
+class LocalDeclarationNode : Node {
+	Node declaration;
+
+	this() {
+		type = NodeType.LocalDeclaration;
+	}
+
+	override string ToString() {
+		return format("local %s\n", declaration.ToString());
+	}
+}
+
+class IntVariableNode : Node {
+	string name;
+
+	this() {
+		type = NodeType.IntVariable;
+	}
+
+	override string ToString() {
+		return format("int %s", name);
+	}
+}
+
+class SetNode : Node {
+	string var;
+	Node   value;
+
+	this() {
+		type = NodeType.Set;
+	}
+
+	override string ToString() {
+		return format("set %s %s", var, value.ToString());
+	}
+}
+
 class Parser {
 	ProgramNode tree;
 	Lexer       lexer;
@@ -257,6 +298,59 @@ class Parser {
 		return cast(Node) node;
 	}
 
+	Node ParseVariableDef() {
+		if (!CorrectToken(TokenType.Keyword)) {
+			return null;
+		}
+
+		Node ret;
+
+		switch (lexer.tokens[i].contents) {
+			case "int": {
+				auto node = new IntVariableNode();
+
+				Next();
+				if (!CorrectToken(TokenType.Identifier)) {
+					return null;
+				}
+
+				node.name = lexer.tokens[i].contents;
+				Next();
+
+				ret = cast(Node) node;
+				break;
+			}
+			default: assert(0);
+		}
+
+		return ret;
+	}
+
+	Node ParseLocal() {
+		auto node = new LocalDeclarationNode();
+		Next();
+		node.declaration = ParseVariableDef();
+
+		return cast(Node) node;
+	}
+
+	Node ParseSet() {
+		auto node = new SetNode();
+
+		Next();
+		if (!CorrectToken(TokenType.Identifier)) {
+			exit(1);
+		}
+
+		node.var = lexer.tokens[i].contents;
+
+		Next();
+		node.value = ParseParameter();
+		Next();
+
+		return cast(Node) node;
+	}
+
 	Node ParseParameter() {
 		Node ret;
 	
@@ -309,19 +403,18 @@ class Parser {
 		switch (lexer.tokens[i].type) {
 			case TokenType.Keyword: {
 				switch (lexer.tokens[i].contents) {
-					case "func": {
-						return ParseFunctionDef();
-					}
-					case "return": {
-						return ParseReturn();
-					}
+					case "func":   return ParseFunctionDef();
+					case "return": return ParseReturn();
+					case "local":  return ParseLocal();
+					case "int":    return ParseVariableDef();
+					case "set":    return ParseSet();
 					default: {
 						ErrorUnexpectedKeyword(
 							lexer.tokens[i].file, lexer.tokens[i].line,
 							lexer.tokens[i].contents
 						);
 						success = false;
-						return null;
+						exit(1);
 					}
 				}
 			}
@@ -352,3 +445,4 @@ class Parser {
 		}
 	}
 }
+

@@ -144,6 +144,8 @@ int main(string[] args) {
 
 	bool          yslmSuccess = true;
 	CompileModule mod         = new Target_x86_16();
+
+	assembly ~= mod.CompileOrg("0x100");
 	
 	foreach (i, ref line ; compiler.output) {
 		auto parts  = Split("<YSL-C out>", i, line, &yslmSuccess);

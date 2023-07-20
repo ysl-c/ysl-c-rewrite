@@ -50,15 +50,7 @@ class Lexer {
 			AddToken(TokenType.Integer);
 		}
 		else if (keywords.canFind(reading)) {
-			if (
-				(tokens.length == 0) ||
-				(tokens[$ - 1].type == TokenType.EndLine)
-			) {
-				AddToken(TokenType.Keyword);
-			}
-			else {
-				AddToken(TokenType.Identifier);
-			}
+			AddToken(TokenType.Keyword);
 		}
 		else {
 			AddToken(TokenType.Identifier);
