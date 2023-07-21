@@ -19,7 +19,8 @@ enum NodeType {
 	Asm,
 	LocalDeclaration,
 	IntVariable,
-	Set
+	Set,
+	Addr
 }
 
 class Node {
@@ -190,6 +191,18 @@ class SetNode : Node {
 	}
 }
 
+class AddrNode : Node {
+	string var;
+
+	this() {
+		type = NodeType.Addr;
+	}
+
+	override string ToString() {
+		return format("addr %s", var);
+	}
+}
+
 class Parser {
 	ProgramNode tree;
 	Lexer       lexer;
@@ -339,6 +352,9 @@ class Parser {
 
 		Next();
 		if (!CorrectToken(TokenType.Identifier)) {
+			ErrorUnexpectedToken(
+				lexer.tokens[i].file, lexer.tokens[i].line, lexer.tokens[i].type
+			);
 			exit(1);
 		}
 
@@ -346,6 +362,23 @@ class Parser {
 
 		Next();
 		node.value = ParseParameter();
+		Next();
+
+		return cast(Node) node;
+	}
+
+	Node ParseAddr() {
+		auto node = new AddrNode();
+
+		Next();
+		if (!CorrectToken(TokenType.Identifier)) {
+			ErrorUnexpectedToken(
+				lexer.tokens[i].file, lexer.tokens[i].line, lexer.tokens[i].type
+			);
+			exit(1);
+		}
+
+		node.var = lexer.tokens[i].contents;
 		Next();
 
 		return cast(Node) node;
@@ -408,6 +441,7 @@ class Parser {
 					case "local":  return ParseLocal();
 					case "int":    return ParseVariableDef();
 					case "set":    return ParseSet();
+					case "addr":   return ParseAddr();
 					default: {
 						ErrorUnexpectedKeyword(
 							lexer.tokens[i].file, lexer.tokens[i].line,

@@ -6,7 +6,8 @@ const string[] keywords = [
 	"return",
 	"int",
 	"local",
-	"set"
+	"set",
+	"addr"
 ];
 
 char Escape(char ch) {

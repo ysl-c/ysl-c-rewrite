@@ -1,0 +1,305 @@
+func putch ch
+	addr ch
+	asm mov si, ax
+	asm mov bx, [si]
+	asm mov ah, 0x0E
+	asm mov al, bl
+	asm int 0x10
+end
+
+func exit
+	asm mov ah, 0x4C
+	asm int 0x21
+end
+
+func add n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm add ax, bx
+end
+
+func sub n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm sub ax, bx
+end
+
+func mul n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm mul bx
+end
+
+func div n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor dx, dx
+	asm div bx
+	asm ret
+end
+
+func mod n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor dx, dx
+	asm div bx
+	asm mov ax, dx
+end
+
+func equals n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm cmp ax, bx
+	asm je .equals
+	asm mov ax, 0
+	asm ret
+	asm .equals:
+	asm mov ax, 1
+end
+
+func less n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm cmp ax, bx
+	asm jl .less
+	asm mov ax, 0
+	asm ret
+	asm .less:
+	asm mov ax, 1
+end
+
+func greater n1 n2
+	addr n2
+	asm mov si, ax
+	asm mov bx, [si]
+	addr n1
+	asm mov si, ax
+	asm mov ax, [si]
+	asm cmp ax, bx
+	asm jg .greater
+	asm mov ax, 0
+	asm ret
+	asm .greater:
+	asm mov ax, 1
+end
+
+func peek8 address
+	addr address
+	asm mov si, ax
+	asm mov di, [si]
+	asm mov al, [di]
+	asm xor ah, ah
+end
+
+func poke8 address value
+	addr address
+	asm mov si, ax
+	asm mov di, [si]
+	addr value
+	asm mov si, ax
+	asm mov al, [si]
+	asm mov [di], al
+end
+
+func peek16 address
+	addr address
+	asm mov si, ax
+	asm mov di, [si]
+	asm mov si, [di]
+	asm mov ax, si
+end
+
+func poke16 address value
+	addr address
+	asm mov si, ax
+	asm mov di, [si]
+	addr value
+	asm mov si, ax
+	asm mov bx, [si]
+	asm mov [di], bx
+end
+
+func peek16far segment address
+	addr address
+	asm mov di, ax
+	asm mov si, [di]
+	addr segment
+	asm mov di, ax
+	asm mov si, [di]
+	asm mov es, si
+	asm mov ax, [es:si]
+end
+
+func poke16far segment address value
+	addr address
+	asm mov di, ax
+	asm mov si, [di]
+	addr segment
+	asm mov di, ax
+	asm mov si, [di]
+	asm mov es, si
+	addr value
+	asm mov di, ax
+	asm mov ax, [di]
+	asm mov [es:si], ax
+end
+
+func peek8far segment address
+	addr address
+	asm mov di, ax
+	asm mov si, [di]
+	addr segment
+	asm mov di, ax
+	asm mov si, [di]
+	asm mov es, si
+	asm xor ah, ah
+	asm mov al, [es:si]
+end
+
+func poke8far segment address value
+	addr address
+	asm mov di, ax
+	asm mov si, [di]
+	addr segment
+	asm mov di, ax
+	asm mov si, [di]
+	asm mov es, si
+	addr value
+	asm mov di, ax
+	asm mov al, [di]
+	asm mov [es:si], al
+end
+
+func getch
+	asm xor ah, ah
+	asm int 0x16
+	asm xor ah, ah
+end
+
+func byte_and v1 v2
+	addr v1
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v2
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor ah, ah
+	asm and al, bl
+end
+
+func byte_xor v1 v2
+	addr v1
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v2
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor ah, ah
+	asm xor al, bl
+end
+
+func byte_or v1 v2
+	addr v1
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v2
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor ah, ah
+	asm or al, bl
+end
+
+func byte_not v
+	addr v
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor ah, ah
+	asm not al
+end
+
+func word_and v1 v2
+	addr v1
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v2
+	asm mov si, ax
+	asm mov ax, [si]
+	asm and ax, bx
+end
+
+func word_xor v1 v2
+	addr v1
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v2
+	asm mov si, ax
+	asm mov ax, [si]
+	asm xor ax, bx
+end
+
+func word_or v1 v2
+	addr v1
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v2
+	asm mov si, ax
+	asm mov ax, [si]
+	asm or ax, bx
+end
+
+func word_not v
+	addr v
+	asm mov si, ax
+	asm mov ax, [si]
+	asm not ax
+end
+
+func left_shift v n
+	addr n
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v
+	asm mov si, ax
+	asm mov ax, [si]
+	asm mov cl, bl
+	asm shl ax, cl
+end
+
+func right_shift v n
+	addr n
+	asm mov si, ax
+	asm mov bx, [si]
+	addr v
+	asm mov si, ax
+	asm mov ax, [si]
+	asm mov cl, bl
+	asm shr ax, cl
+end

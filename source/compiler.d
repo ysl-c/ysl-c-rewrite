@@ -190,6 +190,10 @@ class Compiler {
 		}
 	}
 
+	void CompileAddr(AddrNode node) {
+		output ~= format("get_label %s", GetVariable(node.var));
+	}
+
 	void CompileNode(Node node) {
 		switch (node.type) {
 			case NodeType.FunctionDef: {
@@ -214,6 +218,10 @@ class Compiler {
 			}
 			case NodeType.Set: {
 				CompileSet(cast(SetNode) node);
+				break;
+			}
+			case NodeType.Addr: {
+				CompileAddr(cast(AddrNode) node);
 				break;
 			}
 			default: assert(0);

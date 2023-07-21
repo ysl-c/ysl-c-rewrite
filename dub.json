@@ -4,7 +4,7 @@
 	],
 	"copyright": "Copyright © 2023, yeti0904",
 	"dependencies": {
-		"yslm": "~>1.1.1"
+		"yslm": "~>1.2.0"
 	},
 	"description": "The YSL-C compiler",
 	"license": "GPL-3.0-or-later",
