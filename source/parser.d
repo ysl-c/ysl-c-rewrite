@@ -20,7 +20,8 @@ enum NodeType {
 	LocalDeclaration,
 	IntVariable,
 	Set,
-	Addr
+	Addr,
+	If
 }
 
 class Node {
@@ -203,6 +204,26 @@ class AddrNode : Node {
 	}
 }
 
+class IfNode : Node {
+	FunctionCallNode call;
+	Node[]           ifBody;
+
+	this() {
+		type = NodeType.If;
+	}
+
+	override string ToString() {
+		string str = format("if %s\n", call.ToString());
+
+		foreach (ref node ; ifBody) {
+			str ~= node.ToString() ~ '\n';
+		}
+
+		str ~= "end\n";
+		return str;
+	}
+}
+
 class Parser {
 	ProgramNode tree;
 	Lexer       lexer;
@@ -220,7 +241,7 @@ class Parser {
 		if (i >= lexer.tokens.length) {
 			auto lastToken = lexer.tokens[$ - 1];
 			ErrorExpectedToken(lastToken.file, lastToken.line);
-			success = false;
+			exit(1);
 		}
 	}
 
@@ -372,14 +393,37 @@ class Parser {
 
 		Next();
 		if (!CorrectToken(TokenType.Identifier)) {
-			ErrorUnexpectedToken(
-				lexer.tokens[i].file, lexer.tokens[i].line, lexer.tokens[i].type
-			);
 			exit(1);
 		}
 
 		node.var = lexer.tokens[i].contents;
 		Next();
+
+		return cast(Node) node;
+	}
+
+	Node ParseIf() {
+		auto node = new IfNode();
+
+		Next();
+		if (!CorrectToken(TokenType.Identifier)) {
+			exit(1);
+		}
+
+		node.call = cast(FunctionCallNode) ParseFunctionCall();
+
+		Next();
+		while (
+			(lexer.tokens[i].type != TokenType.Keyword) ||
+			(lexer.tokens[i].contents != "end")
+		) {
+			if (lexer.tokens[i].type == TokenType.EndLine) {
+				Next();
+				continue;
+			}
+			node.ifBody ~= ParseStatement();
+			Next();
+		}
 
 		return cast(Node) node;
 	}
@@ -428,7 +472,7 @@ class Parser {
 		return ret;
 	}
 
-	Node ParseStatement() {
+	Node ParseStatement(bool insideStatement = true) {
 		while (lexer.tokens[i].type == TokenType.EndLine) {
 			Next();
 		}
@@ -436,12 +480,22 @@ class Parser {
 		switch (lexer.tokens[i].type) {
 			case TokenType.Keyword: {
 				switch (lexer.tokens[i].contents) {
-					case "func":   return ParseFunctionDef();
+					case "func": {
+						if (insideStatement) {
+							ErrorFunctionInsideStatement(
+								lexer.tokens[i].file, lexer.tokens[i].line
+							);
+							exit(1);
+						}
+					
+						return ParseFunctionDef();
+					}
 					case "return": return ParseReturn();
 					case "local":  return ParseLocal();
 					case "int":    return ParseVariableDef();
 					case "set":    return ParseSet();
 					case "addr":   return ParseAddr();
+					case "if":     return ParseIf();
 					default: {
 						ErrorUnexpectedKeyword(
 							lexer.tokens[i].file, lexer.tokens[i].line,
@@ -471,7 +525,7 @@ class Parser {
 
 	void Parse() {
 		for (i = 0; i < lexer.tokens.length; ++ i) {
-			tree.children ~= ParseStatement();
+			tree.children ~= ParseStatement(false);
 
 			if (!success) {
 				return;

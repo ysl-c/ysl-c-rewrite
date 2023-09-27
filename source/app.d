@@ -86,7 +86,9 @@ int main(string[] args) {
 	}
 
 	if (lexerDebug) {
-		writeln(lexer.tokens);
+		foreach (ref token ; lexer.tokens) {
+			writeln(token);
+		}
 		return 0;
 	}
 

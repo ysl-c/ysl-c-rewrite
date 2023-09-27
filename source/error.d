@@ -71,3 +71,8 @@ void ErrorWrongParameterAmount(
 		"Wrong amount of parameters, expected %d, got %d", expected, got
 	);
 }
+
+void ErrorFunctionInsideStatement(string fname, size_t line) {
+	ErrorBegin(fname, line);
+	stderr.writeln("Function definitions can't be inside statements");
+}

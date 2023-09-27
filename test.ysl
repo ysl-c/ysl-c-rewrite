@@ -1,7 +1,3 @@
-%include "core.ysl"
-
 func main
-	local int test
-	set test 65
-	putch test
+
 end
